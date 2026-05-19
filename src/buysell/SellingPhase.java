@@ -6,18 +6,22 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
 public class SellingPhase {
     private final List<Player> players;
     private final List<Integer> checkDeck;
     private final HumanInput humanInput;
+    private final Scanner scanner;
     private int startingPlayerIndex;
 
     public SellingPhase(List<Player> players, List<Integer> checkDeck, HumanInput humanInput,
-                        int startingPlayerIndex) {
+                        int startingPlayerIndex, Scanner scanner) {
         this.players = players;
         this.checkDeck = checkDeck;
         this.humanInput = humanInput;
         this.startingPlayerIndex = startingPlayerIndex;
+        this.scanner = scanner;
     }
 
     public boolean play() {
@@ -61,8 +65,12 @@ public class SellingPhase {
                     return false;
                 }
                 chosen = choice;
+                System.out.println("You have locked in a property.");
             } else {
+                TurnPacing.pauseBeforeAiTurn(scanner, player.getName());
                 chosen = AiLogic.chooseProperty(player.getProperties(), minCheck, maxCheck);
+                System.out.println(player.getName() + " has locked in a property.");
+                TurnPacing.pauseAfterAiTurn(scanner);
             }
 
             if (!player.removeProperty(chosen)) {
@@ -70,7 +78,6 @@ public class SellingPhase {
                 return false;
             }
             choices.put(player, chosen);
-            System.out.println(player.getName() + " has locked in a property.");
         }
 
         System.out.println();

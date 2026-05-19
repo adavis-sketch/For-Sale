@@ -3,17 +3,22 @@ package buysell;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
+
 public class BiddingPhase {
     private final List<Player> players;
     private final List<Integer> propertyDeck;
     private final HumanInput humanInput;
+    private final Scanner scanner;
     private int startingPlayerIndex;
     private int lastRoundWinnerIndex = -1;
 
-    public BiddingPhase(List<Player> players, List<Integer> propertyDeck, HumanInput humanInput) {
+    public BiddingPhase(List<Player> players, List<Integer> propertyDeck, HumanInput humanInput,
+                        Scanner scanner) {
         this.players = players;
         this.propertyDeck = propertyDeck;
         this.humanInput = humanInput;
+        this.scanner = scanner;
     }
 
     public boolean play() {
@@ -31,6 +36,8 @@ public class BiddingPhase {
     }
 
     private boolean playRound(int roundNumber) {
+        humanInput.resetBiddingRound();
+
         List<Integer> shown = drawProperties(4);
         Collections.sort(shown);
 
@@ -53,6 +60,10 @@ public class BiddingPhase {
 
             if (!active.contains(current)) {
                 continue;
+            }
+
+            if (!current.isHuman()) {
+                TurnPacing.pauseBeforeAiTurn(scanner, current.getName());
             }
 
             System.out.println("Asking price this turn: $" + formatMoney(askingPrice));
@@ -87,10 +98,18 @@ public class BiddingPhase {
                         + (payment > 0 ? ", paying $" + formatMoney(payment) : ", paying nothing."));
             }
 
+            if (!current.isHuman()) {
+                TurnPacing.pauseAfterAiTurn(scanner);
+            }
+
             askingPrice += 1000;
         }
 
         Player winner = active.get(0);
+        if (!winner.isHuman()) {
+            TurnPacing.pauseBeforeAiTurn(scanner, winner.getName());
+        }
+
         Collections.sort(available);
         int winningCard = available.get(available.size() - 1);
         int payment = winner.getRoundBid();
@@ -102,7 +121,12 @@ public class BiddingPhase {
         System.out.println();
         System.out.println(winner.getName() + " wins property #" + winningCard
                 + " and pays $" + formatMoney(payment) + ".");
-        System.out.println();
+
+        if (!winner.isHuman()) {
+            TurnPacing.pauseAfterAiTurn(scanner);
+        } else {
+            System.out.println();
+        }
 
         return true;
     }

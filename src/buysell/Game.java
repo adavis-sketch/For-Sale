@@ -24,7 +24,7 @@ public class Game {
         List<Integer> propertyDeck = DeckUtil.createPropertyDeck();
         List<Integer> checkDeck = DeckUtil.createCheckDeck();
 
-        BiddingPhase bidding = new BiddingPhase(players, propertyDeck, humanInput);
+        BiddingPhase bidding = new BiddingPhase(players, propertyDeck, humanInput, scanner);
         if (!bidding.play()) {
             return;
         }
@@ -32,7 +32,7 @@ public class Game {
         humanInput.resetGriefingBetweenPhases();
 
         SellingPhase selling = new SellingPhase(players, checkDeck, humanInput,
-                bidding.getPhaseTwoStartingPlayerIndex());
+                bidding.getPhaseTwoStartingPlayerIndex(), scanner);
         if (!selling.play()) {
             return;
         }
