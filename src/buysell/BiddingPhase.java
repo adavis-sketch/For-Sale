@@ -66,6 +66,7 @@ public class BiddingPhase {
                 TurnPacing.pauseBeforeAiTurn(scanner, current.getName());
             }
 
+            printAvailableCards(available);
             System.out.println("Asking price this turn: $" + formatMoney(askingPrice));
             System.out.println(current.getName() + " — Money: $" + formatMoney(current.getMoney())
                     + (current.getRoundBid() > 0
@@ -110,6 +111,7 @@ public class BiddingPhase {
             TurnPacing.pauseBeforeAiTurn(scanner, winner.getName());
         }
 
+        printAvailableCards(available);
         Collections.sort(available);
         int winningCard = available.get(available.size() - 1);
         int payment = winner.getRoundBid();
@@ -168,6 +170,18 @@ public class BiddingPhase {
             drawn.add(propertyDeck.remove(0));
         }
         return drawn;
+    }
+
+    private static void printAvailableCards(List<Integer> available) {
+        List<Integer> sorted = new ArrayList<>(available);
+        Collections.sort(sorted);
+        if (sorted.size() == 1) {
+            System.out.println("Card available: #" + sorted.get(0) + " (goes to the last bidder)");
+        } else {
+            System.out.println("Cards available: " + sorted
+                    + " (lowest #" + sorted.get(0) + " — next passer; highest #"
+                    + sorted.get(sorted.size() - 1) + " — last bidder)");
+        }
     }
 
     private static String formatMoney(int amount) {
