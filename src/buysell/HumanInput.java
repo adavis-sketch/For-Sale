@@ -23,8 +23,9 @@ public class HumanInput {
     }
 
     public Action readBidOrPass(Player player, int askingPrice) {
+        String name = player.getName();
         if (forcedPassThisBiddingRound) {
-            System.out.println("You must pass — you were automatically passed earlier this round.");
+            System.out.println(name + " must pass — automatically passed earlier this round.");
             return Action.PASS;
         }
 
@@ -34,7 +35,7 @@ public class HumanInput {
 
             if (line.equalsIgnoreCase("bid")) {
                 if (player.getMoney() < askingPrice) {
-                    System.out.println("You do not have enough money. You must pass.");
+                    System.out.println(name + " does not have enough money and must pass.");
                     Action result = handleInvalidStrike(player, true);
                     if (result != null) {
                         return result;
@@ -61,8 +62,9 @@ public class HumanInput {
     }
 
     public Integer readPropertyChoice(Player player) {
+        String name = player.getName();
         player.sortPropertiesForDisplay();
-        System.out.println("Your properties: " + player.getProperties());
+        System.out.println(PlayerNames.possessive(name) + " properties: " + player.getProperties());
         System.out.print("Enter the property value you want to play: ");
 
         while (true) {
@@ -74,7 +76,7 @@ public class HumanInput {
                     consecutiveInvalid = 0;
                     return value;
                 }
-                System.out.println("You do not own that property. Try again.");
+                System.out.println(name + " does not own that property. Try again.");
             } catch (NumberFormatException e) {
                 System.out.println("Invalid statement. Enter a property number you own.");
             }
@@ -86,7 +88,8 @@ public class HumanInput {
             if (result == Action.PASS) {
                 player.sortPropertiesForDisplay();
                 int lowest = player.getProperties().get(0);
-                System.out.println("Automatically playing your lowest property (#" + lowest + ").");
+                System.out.println("Automatically playing " + PlayerNames.possessive(name)
+                        + " lowest property (#" + lowest + ").");
                 return lowest;
             }
             System.out.print("Enter the property value you want to play: ");
@@ -104,9 +107,11 @@ public class HumanInput {
         roundsWithAutoPass++;
         if (biddingRound) {
             forcedPassThisBiddingRound = true;
-            System.out.println("Three invalid attempts in a row — you are automatically passing.");
+            System.out.println("Three invalid attempts in a row — " + player.getName()
+                    + " is automatically passing.");
         } else {
-            System.out.println("Three invalid attempts in a row — a property is chosen for you.");
+            System.out.println("Three invalid attempts in a row — a property is chosen for "
+                    + player.getName() + ".");
         }
 
         if (roundsWithAutoPass >= 2) {

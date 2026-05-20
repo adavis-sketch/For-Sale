@@ -65,23 +65,20 @@ public class BiddingPhase {
             System.out.println("Asking price this turn: $" + formatMoney(askingPrice));
             System.out.println(current.getName() + " — Money: $" + formatMoney(current.getMoney())
                     + (current.getRoundBid() > 0
-                    ? " | Your bid so far: $" + formatMoney(current.getRoundBid())
+                    ? " | " + PlayerNames.possessive(current.getName()) + " bid so far: $"
+                            + formatMoney(current.getRoundBid())
                     : ""));
 
             TurnChoice choice = resolveBidChoice(current, askingPrice, available);
             if (choice == TurnChoice.KICKED) {
                 System.out.println();
-                System.out.println("You've been kicked for griefing.");
+                System.out.println(humanPlayerName() + " has been kicked for griefing.");
                 return false;
             }
 
             if (choice == TurnChoice.BID) {
                 current.setRoundBid(askingPrice);
-                if (current.isHuman()) {
-                    System.out.println("Bid at $" + formatMoney(askingPrice) + ".");
-                } else {
-                    System.out.println(current.getName() + " bids at $" + formatMoney(askingPrice) + ".");
-                }
+                System.out.println(current.getName() + " bids at $" + formatMoney(askingPrice) + ".");
             } else {
                 int payment = passPayment(current);
                 Collections.sort(available);
@@ -91,12 +88,8 @@ public class BiddingPhase {
                 active.remove(current);
 
                 String paymentText = payment > 0 ? ", paying $" + formatMoney(payment) : ", paying nothing";
-                if (current.isHuman()) {
-                    System.out.println("Passed and received property #" + card + paymentText + ".");
-                } else {
-                    System.out.println(current.getName() + " passes and receives property #" + card
-                            + paymentText + ".");
-                }
+                System.out.println(current.getName() + " passes and receives property #" + card
+                        + paymentText + ".");
             }
 
             if (!current.isHuman()) {
@@ -121,12 +114,8 @@ public class BiddingPhase {
         startingPlayerIndex = (lastRoundWinnerIndex + 1) % players.size();
 
         System.out.println();
-        if (winner.isHuman()) {
-            System.out.println("Won property #" + winningCard + " and paid $" + formatMoney(payment) + ".");
-        } else {
-            System.out.println(winner.getName() + " wins property #" + winningCard
-                    + " and pays $" + formatMoney(payment) + ".");
-        }
+        System.out.println(winner.getName() + " wins property #" + winningCard
+                + " and pays $" + formatMoney(payment) + ".");
 
         if (!winner.isHuman()) {
             TurnPacing.afterAiTurn();
@@ -182,6 +171,15 @@ public class BiddingPhase {
                     + " (lowest #" + sorted.get(0) + " — next passer; highest #"
                     + sorted.get(sorted.size() - 1) + " — last bidder)");
         }
+    }
+
+    private String humanPlayerName() {
+        for (Player player : players) {
+            if (player.isHuman()) {
+                return player.getName();
+            }
+        }
+        return "Player";
     }
 
     private static String formatMoney(int amount) {

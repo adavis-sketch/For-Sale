@@ -12,10 +12,10 @@ public class Game {
     private final HumanInput humanInput;
     private final List<Player> players;
 
-    public Game(Scanner scanner) {
+    public Game(Scanner scanner, String humanName) {
         this.scanner = scanner;
         this.humanInput = new HumanInput(scanner);
-        this.players = createPlayers();
+        this.players = createPlayers(humanName);
     }
 
     public void run() {
@@ -40,9 +40,9 @@ public class Game {
         printFinalStandings();
     }
 
-    private List<Player> createPlayers() {
+    private List<Player> createPlayers(String humanName) {
         List<Player> list = new ArrayList<>();
-        list.add(new Player("You", true, STARTING_MONEY));
+        list.add(new Player(humanName, true, STARTING_MONEY));
         list.add(new Player("AI 1", false, STARTING_MONEY));
         list.add(new Player("AI 2", false, STARTING_MONEY));
         list.add(new Player("AI 3", false, STARTING_MONEY));
@@ -81,10 +81,11 @@ public class Game {
         }
 
         System.out.println();
-        if (ranked.get(0).isHuman()) {
-            System.out.println("Congratulations — you win!");
+        Player winner = ranked.get(0);
+        if (winner.isHuman()) {
+            System.out.println("Congratulations — " + winner.getName() + " wins!");
         } else {
-            System.out.println(ranked.get(0).getName() + " wins the game.");
+            System.out.println(winner.getName() + " wins the game.");
         }
     }
 

@@ -9,11 +9,27 @@ public class BuyAndSell {
             waitForInput(scanner, "Type PLAY to play Buy and Sell", "play");
 
             while (true) {
-                new Game(scanner).run();
+                String playerName = readPlayerName(scanner);
+                if (PlayerNames.isBlockedName(playerName)) {
+                    System.out.println("you lose weirdo");
+                    return;
+                }
+                new Game(scanner, playerName).run();
                 waitForInput(scanner, "To play again type AGAIN", "again");
             }
         } finally {
             scanner.close();
+        }
+    }
+
+    private static String readPlayerName(Scanner scanner) {
+        while (true) {
+            System.out.println("Enter your name:");
+            String name = scanner.nextLine().trim();
+            if (!name.isEmpty()) {
+                return name;
+            }
+            System.out.println("Name cannot be empty.");
         }
     }
 

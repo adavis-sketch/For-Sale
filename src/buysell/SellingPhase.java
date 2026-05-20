@@ -59,11 +59,11 @@ public class SellingPhase {
                 Integer choice = humanInput.readPropertyChoice(player);
                 if (choice == null) {
                     System.out.println();
-                    System.out.println("You've been kicked for griefing.");
+                    System.out.println(player.getName() + " has been kicked for griefing.");
                     return false;
                 }
                 chosen = choice;
-                System.out.println("You have locked in a property.");
+                System.out.println(player.getName() + " has locked in a property.");
             } else {
                 TurnPacing.beforeAiTurn(player.getName());
                 chosen = AiLogic.chooseProperty(player.getProperties(), minCheck, maxCheck);
