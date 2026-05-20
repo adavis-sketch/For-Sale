@@ -6,7 +6,8 @@ public final class PlayerNames {
 
     public static boolean isBlockedName(String name) {
         String lower = name.trim().toLowerCase();
-        return lower.equals("micah") || lower.equals("mdeezy") || lower.equals("md");
+        return lower.equals("micah") || lower.equals("mdeezy") || lower.equals("md")
+                || lower.equals("kaden") || lower.equals("henry") || lower.equals("daniel");
     }
 
     public static String possessive(String name) {
