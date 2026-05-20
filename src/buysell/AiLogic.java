@@ -7,15 +7,43 @@ import java.util.Random;
 
 public final class AiLogic {
     private static final Random RANDOM = new Random();
+    private static final int STARTING_MONEY = 18_000;
+    private static final int MAX_CARD_VALUE = 20;
 
     private AiLogic() {
     }
 
-    public static boolean shouldBid(int askingPrice, boolean firstTurnOfRound) {
-        double baseChance = firstTurnOfRound ? 0.82 : 0.55;
-        int stepsAboveBase = Math.max(0, (askingPrice / 1000) - 1);
-        double chance = baseChance - (stepsAboveBase * 0.12);
-        chance = Math.max(0.08, Math.min(0.95, chance));
+    /**
+     * Bid chance from five factors: highest card, lowest card, spread, cash on hand,
+     * and current asking price (higher price lowers willingness).
+     */
+    public static boolean shouldBid(int askingPrice, int money, List<Integer> availableCards) {
+        if (money < askingPrice) {
+            return false;
+        }
+
+        List<Integer> sorted = new ArrayList<>(availableCards);
+        Collections.sort(sorted);
+        int lowest = sorted.get(0);
+        int highest = sorted.get(sorted.size() - 1);
+        int spread = highest - lowest;
+
+        double highFactor = (highest - 1.0) / (MAX_CARD_VALUE - 1);
+        double lowFactor = (MAX_CARD_VALUE - lowest) / (double) MAX_CARD_VALUE;
+        double spreadFactor = spread / (double) (MAX_CARD_VALUE - 1);
+        double moneyFactor = Math.min(1.0, money / (double) STARTING_MONEY);
+        double priceFactor = Math.min(1.0, askingPrice / (double) STARTING_MONEY);
+
+        double chance = 0.50
+                + highFactor * 0.13
+                + lowFactor * 0.09
+                + spreadFactor * 0.11
+                + moneyFactor * 0.11
+                - priceFactor * 0.25;
+
+        chance += (RANDOM.nextDouble() - 0.5) * 0.08;
+        chance = Math.max(0.18, Math.min(0.88, chance));
+
         return RANDOM.nextDouble() < chance;
     }
 

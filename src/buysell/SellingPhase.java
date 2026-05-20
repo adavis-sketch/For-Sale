@@ -6,22 +6,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-
 public class SellingPhase {
     private final List<Player> players;
     private final List<Integer> checkDeck;
     private final HumanInput humanInput;
-    private final Scanner scanner;
     private int startingPlayerIndex;
 
     public SellingPhase(List<Player> players, List<Integer> checkDeck, HumanInput humanInput,
-                        int startingPlayerIndex, Scanner scanner) {
+                        int startingPlayerIndex) {
         this.players = players;
         this.checkDeck = checkDeck;
         this.humanInput = humanInput;
         this.startingPlayerIndex = startingPlayerIndex;
-        this.scanner = scanner;
     }
 
     public boolean play() {
@@ -67,10 +63,10 @@ public class SellingPhase {
                 chosen = choice;
                 System.out.println("You have locked in a property.");
             } else {
-                TurnPacing.pauseBeforeAiTurn(scanner, player.getName());
+                TurnPacing.beforeAiTurn(player.getName());
                 chosen = AiLogic.chooseProperty(player.getProperties(), minCheck, maxCheck);
                 System.out.println(player.getName() + " has locked in a property.");
-                TurnPacing.pauseAfterAiTurn(scanner);
+                TurnPacing.afterAiTurn();
             }
 
             if (!player.removeProperty(chosen)) {
@@ -92,17 +88,32 @@ public class SellingPhase {
         List<Integer> checksHighToLow = new ArrayList<>(checks);
         checksHighToLow.sort(Comparator.reverseOrder());
 
+        Map<Player, Integer> checksAwarded = new HashMap<>();
         for (int i = 0; i < ranking.size(); i++) {
             Player player = ranking.get(i);
             int check = checksHighToLow.get(i);
             player.addCheck(check);
+            checksAwarded.put(player, check);
             System.out.println(player.getName() + " (#" + choices.get(player) + ") receives check: $"
                     + formatMoney(check));
         }
 
+        printRoundCheckSummary(checksAwarded, choices);
+
         startingPlayerIndex = (startingPlayerIndex + 1) % players.size();
         System.out.println();
         return true;
+    }
+
+    private void printRoundCheckSummary(Map<Player, Integer> checksAwarded, Map<Player, Integer> choices) {
+        System.out.println();
+        System.out.println("--- Checks awarded this round ---");
+        for (Player player : players) {
+            int property = choices.get(player);
+            int check = checksAwarded.get(player);
+            System.out.println(player.getName() + " — property #" + property + " → $"
+                    + formatMoney(check));
+        }
     }
 
     private List<Integer> drawChecks(int count) {

@@ -3,22 +3,17 @@ package buysell;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
-
 public class BiddingPhase {
     private final List<Player> players;
     private final List<Integer> propertyDeck;
     private final HumanInput humanInput;
-    private final Scanner scanner;
     private int startingPlayerIndex;
     private int lastRoundWinnerIndex = -1;
 
-    public BiddingPhase(List<Player> players, List<Integer> propertyDeck, HumanInput humanInput,
-                        Scanner scanner) {
+    public BiddingPhase(List<Player> players, List<Integer> propertyDeck, HumanInput humanInput) {
         this.players = players;
         this.propertyDeck = propertyDeck;
         this.humanInput = humanInput;
-        this.scanner = scanner;
     }
 
     public boolean play() {
@@ -63,7 +58,7 @@ public class BiddingPhase {
             }
 
             if (!current.isHuman()) {
-                TurnPacing.pauseBeforeAiTurn(scanner, current.getName());
+                TurnPacing.beforeAiTurn(current.getName());
             }
 
             printAvailableCards(available);
@@ -73,7 +68,7 @@ public class BiddingPhase {
                     ? " | Your bid so far: $" + formatMoney(current.getRoundBid())
                     : ""));
 
-            TurnChoice choice = resolveBidChoice(current, askingPrice);
+            TurnChoice choice = resolveBidChoice(current, askingPrice, available);
             if (choice == TurnChoice.KICKED) {
                 System.out.println();
                 System.out.println("You've been kicked for griefing.");
@@ -82,10 +77,10 @@ public class BiddingPhase {
 
             if (choice == TurnChoice.BID) {
                 current.setRoundBid(askingPrice);
-                if (!current.isHuman()) {
-                    System.out.println(current.getName() + " bids at $" + formatMoney(askingPrice) + ".");
+                if (current.isHuman()) {
+                    System.out.println("Bid at $" + formatMoney(askingPrice) + ".");
                 } else {
-                    System.out.println("You bid $" + formatMoney(askingPrice) + ".");
+                    System.out.println(current.getName() + " bids at $" + formatMoney(askingPrice) + ".");
                 }
             } else {
                 int payment = passPayment(current);
@@ -95,12 +90,17 @@ public class BiddingPhase {
                 current.subtractMoney(payment);
                 active.remove(current);
 
-                System.out.println(current.getName() + " passes and receives property #" + card
-                        + (payment > 0 ? ", paying $" + formatMoney(payment) : ", paying nothing."));
+                String paymentText = payment > 0 ? ", paying $" + formatMoney(payment) : ", paying nothing";
+                if (current.isHuman()) {
+                    System.out.println("Passed and received property #" + card + paymentText + ".");
+                } else {
+                    System.out.println(current.getName() + " passes and receives property #" + card
+                            + paymentText + ".");
+                }
             }
 
             if (!current.isHuman()) {
-                TurnPacing.pauseAfterAiTurn(scanner);
+                TurnPacing.afterAiTurn();
             }
 
             askingPrice += 1000;
@@ -108,7 +108,7 @@ public class BiddingPhase {
 
         Player winner = active.get(0);
         if (!winner.isHuman()) {
-            TurnPacing.pauseBeforeAiTurn(scanner, winner.getName());
+            TurnPacing.beforeAiTurn(winner.getName());
         }
 
         printAvailableCards(available);
@@ -121,11 +121,15 @@ public class BiddingPhase {
         startingPlayerIndex = (lastRoundWinnerIndex + 1) % players.size();
 
         System.out.println();
-        System.out.println(winner.getName() + " wins property #" + winningCard
-                + " and pays $" + formatMoney(payment) + ".");
+        if (winner.isHuman()) {
+            System.out.println("Won property #" + winningCard + " and paid $" + formatMoney(payment) + ".");
+        } else {
+            System.out.println(winner.getName() + " wins property #" + winningCard
+                    + " and pays $" + formatMoney(payment) + ".");
+        }
 
         if (!winner.isHuman()) {
-            TurnPacing.pauseAfterAiTurn(scanner);
+            TurnPacing.afterAiTurn();
         } else {
             System.out.println();
         }
@@ -137,7 +141,7 @@ public class BiddingPhase {
         BID, PASS, KICKED
     }
 
-    private TurnChoice resolveBidChoice(Player current, int askingPrice) {
+    private TurnChoice resolveBidChoice(Player current, int askingPrice, List<Integer> available) {
         if (current.isHuman()) {
             HumanInput.Action action = humanInput.readBidOrPass(current, askingPrice);
             if (action == HumanInput.Action.KICKED) {
@@ -149,11 +153,7 @@ public class BiddingPhase {
             return TurnChoice.PASS;
         }
 
-        boolean firstTurn = current.getRoundBid() == 0;
-        boolean bid = AiLogic.shouldBid(askingPrice, firstTurn);
-        if (bid && current.getMoney() < askingPrice) {
-            bid = false;
-        }
+        boolean bid = AiLogic.shouldBid(askingPrice, current.getMoney(), available);
         return bid ? TurnChoice.BID : TurnChoice.PASS;
     }
 
