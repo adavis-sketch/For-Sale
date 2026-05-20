@@ -52,6 +52,8 @@ public class SellingPhase {
             Player player = players.get((startingPlayerIndex + i) % players.size());
             int chosen;
 
+            printChecksUpForGrabs(checks);
+
             if (player.isHuman()) {
                 player.sortPropertiesForDisplay();
                 Integer choice = humanInput.readPropertyChoice(player);
@@ -99,10 +101,15 @@ public class SellingPhase {
         }
 
         printRoundCheckSummary(checksAwarded, choices);
+        TurnPacing.pauseToReadResults();
 
         startingPlayerIndex = (startingPlayerIndex + 1) % players.size();
         System.out.println();
         return true;
+    }
+
+    private void printChecksUpForGrabs(List<Integer> checks) {
+        System.out.println("Checks up for grabs: " + formatCheckList(checks));
     }
 
     private void printRoundCheckSummary(Map<Player, Integer> checksAwarded, Map<Player, Integer> choices) {

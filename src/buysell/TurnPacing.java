@@ -3,6 +3,7 @@ package buysell;
 public final class TurnPacing {
     private static final int MS_BEFORE_AI_TURN = 2000;
     private static final int MS_AFTER_AI_TURN = 1500;
+    private static final int MS_READ_RESULTS = 2500;
 
     private TurnPacing() {
     }
@@ -16,6 +17,10 @@ public final class TurnPacing {
     public static void afterAiTurn() {
         sleep(MS_AFTER_AI_TURN);
         System.out.println();
+    }
+
+    public static void pauseToReadResults() {
+        sleep(MS_READ_RESULTS);
     }
 
     private static void sleep(int milliseconds) {

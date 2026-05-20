@@ -14,11 +14,12 @@ public final class AiLogic {
     }
 
     /**
-     * Bid chance from five factors: highest card, lowest card, spread, cash on hand,
-     * and current asking price (higher price lowers willingness).
+     * Bid chance from cards still in the pot this round, cash on hand, and asking price.
+     * High/low/spread all use only remaining properties — a tight cluster (e.g. #17 vs #18)
+     * stays timid even if the round started with a much lower card.
      */
     public static boolean shouldBid(int askingPrice, int money, List<Integer> availableCards) {
-        if (money < askingPrice) {
+        if (money < askingPrice || availableCards.isEmpty()) {
             return false;
         }
 
@@ -28,16 +29,18 @@ public final class AiLogic {
         int highest = sorted.get(sorted.size() - 1);
         int spread = highest - lowest;
 
-        double highFactor = (highest - 1.0) / (MAX_CARD_VALUE - 1);
-        double lowFactor = (MAX_CARD_VALUE - lowest) / (double) MAX_CARD_VALUE;
-        double spreadFactor = spread / (double) (MAX_CARD_VALUE - 1);
+        double spreadNorm = spread / (double) (MAX_CARD_VALUE - 1);
+
+        double highFactor = (highest / (double) MAX_CARD_VALUE) * spreadNorm;
+        double lowFactor = ((MAX_CARD_VALUE - lowest) / (double) MAX_CARD_VALUE) * spreadNorm;
+        double spreadFactor = spreadNorm;
         double moneyFactor = Math.min(1.0, money / (double) STARTING_MONEY);
         double priceFactor = Math.min(1.0, askingPrice / (double) STARTING_MONEY);
 
         double chance = 0.50
-                + highFactor * 0.13
-                + lowFactor * 0.09
-                + spreadFactor * 0.11
+                + highFactor * 0.12
+                + lowFactor * 0.10
+                + spreadFactor * 0.14
                 + moneyFactor * 0.11
                 - priceFactor * 0.25;
 
