@@ -10,7 +10,7 @@ javac -d out src/buysell/*.java
 java -cp out buysell.BuyAndSell
 ```
 
-At the prompt, type `PLAY` to start. After a game finishes, type `AGAIN` to play another round. All commands are case-insensitive.
+At the prompt, type `PLAY` to start. After a game finishes, answer `yes` or `no` when asked to play again (`y` / `n` also work). Three invalid answers in a row at either prompt ends the program. All commands are case-insensitive.
 
 ## Rules summary
 
